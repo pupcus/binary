@@ -32,10 +32,10 @@
 ;;
 
 (def byte-order
-     {
-      :big    ByteOrder/BIG_ENDIAN
-      :little ByteOrder/LITTLE_ENDIAN
-      })
+  {
+   :big    ByteOrder/BIG_ENDIAN
+   :little ByteOrder/LITTLE_ENDIAN
+   })
 
 ;;
 ;; utilities for building java byte arrays (byte[])
@@ -53,30 +53,30 @@
 (defmethod to-bytes java.lang.Byte [b] [b])
 
 (defmethod to-bytes java.lang.Character [c]
-           [(as-byte (int c))])
+  [(as-byte (int c))])
 
 (defmethod to-bytes java.lang.Integer [i]
-           (vec (.array (.flip (.putInt (java.nio.ByteBuffer/allocate int-size) i)))))
+  (vec (.array (.flip (.putInt (java.nio.ByteBuffer/allocate int-size) i)))))
 
 (defmethod to-bytes java.lang.Long [l]
-           (vec (.array (.flip (.putInt (java.nio.ByteBuffer/allocate long-size) l)))))
+  (vec (.array (.flip (.putInt (java.nio.ByteBuffer/allocate long-size) l)))))
 
 (defmethod to-bytes java.lang.Float [f]
-           (vec (.array (.flip (.putFloat (java.nio.ByteBuffer/allocate float-size) f)))))
+  (vec (.array (.flip (.putFloat (java.nio.ByteBuffer/allocate float-size) f)))))
 
 (defmethod to-bytes java.lang.Double [d]
-           (vec (.array (.flip (.putDouble (java.nio.ByteBuffer/allocate double-size) d)))))
+  (vec (.array (.flip (.putDouble (java.nio.ByteBuffer/allocate double-size) d)))))
 
 (defmethod to-bytes java.lang.String [s]
-           (vec (map to-bytes s)))
+  (vec (map to-bytes s)))
 
 (defmethod to-bytes clojure.lang.PersistentVector [v]
-           (vec (map to-bytes v)))
+  (vec (map to-bytes v)))
 
 (def byte-array-class (class (.getBytes "")))
 
 (defmethod to-bytes byte-array-class [ba]
-           (vec ba))
+  (vec ba))
 
 (defn to-byte-array [xs]
   (byte-array (flatten (map to-bytes xs))))
