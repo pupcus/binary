@@ -1,4 +1,5 @@
 (ns binary.test.core
+  (:refer-clojure :exclude [read])
   (:use [binary.core])
   (:use [clojure.test]))
 
