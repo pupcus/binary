@@ -27,6 +27,12 @@
    })
 
 
+(defn size-bits [#^java.lang.Number n]
+  (eval (list '. (class n) 'SIZE)))
+
+(defn size-bytes [#^java.lang.Number n]
+  (/ (size-bits n) bits-in-octet))
+
 ;;
 ;; endian byte orders
 ;;
@@ -46,40 +52,63 @@
             (- i 256)
             i))))
 
-(defmulti to-bytes class)
+(defn to-bytes-dispatch
+  ([n]   (class n))
+  ([n _] (to-bytes-dispatch n)))
 
-(defmethod to-bytes nil [_] (byte 0))
+(defmulti to-bytes to-bytes-dispatch)
 
-(defmethod to-bytes java.lang.Byte [b] [b])
+(defmethod to-bytes nil
+  ([_]   (byte 0))
+  ([_ _] (byte 0)))
 
-(defmethod to-bytes java.lang.Character [c]
-  [(as-byte (int c))])
+(defmethod to-bytes java.lang.Byte
+  ([b]   [b])
+  ([b _] [b]))
 
-(defmethod to-bytes java.lang.Integer [i]
-  (vec (.array (.flip (.putInt (java.nio.ByteBuffer/allocate int-size) i)))))
+(defmethod to-bytes java.lang.Character
+  ([c]   [(as-byte (int c))])
+  ([c _] (to-bytes c)))
 
-(defmethod to-bytes java.lang.Long [l]
-  (vec (.array (.flip (.putInt (java.nio.ByteBuffer/allocate long-size) l)))))
+(defmethod to-bytes java.lang.Integer
+  ([i]   (to-bytes i :big))
+  ([i e] (vec (.array (.flip (.putInt (.order (java.nio.ByteBuffer/allocate int-size) (byte-order e)) i))))))
 
-(defmethod to-bytes java.lang.Float [f]
-  (vec (.array (.flip (.putFloat (java.nio.ByteBuffer/allocate float-size) f)))))
+(defmethod to-bytes java.lang.Long
+  ([l]   (to-bytes l :big))
+  ([l e] (vec (.array (.flip (.putLong (.order (java.nio.ByteBuffer/allocate long-size) (byte-order e)) l))))))
 
-(defmethod to-bytes java.lang.Double [d]
-  (vec (.array (.flip (.putDouble (java.nio.ByteBuffer/allocate double-size) d)))))
+(defmethod to-bytes java.lang.Float
+  ([f]   (to-bytes f :big))
+  ([f e] (vec (.array (.flip (.putFloat (.order (java.nio.ByteBuffer/allocate float-size) (byte-order e)) f))))))
 
-(defmethod to-bytes java.lang.String [s]
-  (vec (map to-bytes s)))
+(defmethod to-bytes java.lang.Double
+  ([d]   (to-bytes d :big))
+  ([d e] (vec (.array (.flip (.putDouble (.order (java.nio.ByteBuffer/allocate double-size) (byte-order e)) d))))))
 
-(defmethod to-bytes clojure.lang.PersistentVector [v]
-  (vec (map to-bytes v)))
+(defmethod to-bytes java.lang.String
+  ([s]   (vec (map to-bytes s)))
+  ([s _] (to-bytes s)))
+
+(defmethod to-bytes clojure.lang.IPersistentVector
+  ([v]        (to-bytes v :big))
+  ([v endian] (vec (flatten (map #(to-bytes % endian) v)))))
+
+(defmethod to-bytes clojure.lang.IPersistentMap
+  ([{:keys [endian] :or {endian :big} :as data}] (to-bytes (dissoc data :endian) endian))
+  ([data endian]
+     (if (> (count data) 1)
+       (throw (Exception. "only one data element allowed in map with optional :endian setting ie. {:data <value> <:endian <endian>>}"))
+       (vec (flatten (map (fn [[k v]] (to-bytes v endian)) data))))))
 
 (def byte-array-class (class (.getBytes "")))
 
-(defmethod to-bytes byte-array-class [ba]
-  (vec ba))
+(defmethod to-bytes byte-array-class
+  ([ba]   (vec ba))
+  ([ba _] (vec ba)))
 
 (defn to-byte-array [xs]
-  (byte-array (flatten (map to-bytes xs))))
+  (byte-array (flatten (vec (map to-bytes xs)))))
 
 (defn bit-set? [bn n]
   (let [check (bit-shift-left (long 1) bn)]
@@ -205,6 +234,11 @@
     (.putInt buf size)
     (.put buf bytes 0 size)))
 
+(defn safe-write [buf {:keys [name type number size] :or {number 1 size 1}} data]
+  (let [bytes-needed (min (* number size (sizes type)) (count (to-byte-array (name data))))]
+    (if (< bytes-needed (.remaining buf))
+      (.resize buf (+ (.limit buf) bytes-needed)))))
+
 (defn encode-buffer [buf {:keys [number] :or {number 1} :as form} data]
   (if (> number 1)
     (doseq [i (range number)] (let [piece (nth data i)] (write buf form piece)))
@@ -224,3 +258,21 @@
       buf
       (recur (merge sofar (process-form-encode buf (first forms) sofar)) (rest forms)))))
 
+
+;;
+;; take any number and encode it to bytes
+;;
+
+(defn little-endian-bytes [#^java.lang.Number n]
+  (let [size (size-bytes n)]
+    (loop [bytes [] count 0]
+      (if (< count size)
+        (recur (conj bytes (as-byte (bit-shift-right n (* count bits-in-octet)))) (inc count))
+        bytes))))
+
+(defn big-endian-bytes [#^java.lang.Number n]
+  (let [size (size-bytes n)]
+    (loop [bytes [] count size]
+      (if (> count 0)
+        (recur (conj bytes (as-byte (bit-shift-right n (* (dec count) bits-in-octet)))) (dec count))
+        bytes))))
