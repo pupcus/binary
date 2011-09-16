@@ -38,7 +38,7 @@ examples of the sorts of things you can put into the vector for packing into the
 
    [10 [20 30 40] {:data 0x01020304 :endian :little} (byte 0x11) (short 23) (long 1000) 10.4 (float 10.4) "test" ["test" nil]]
 
-hash maps should contain one entry of data (key doesn't matter) and one optional entry for 'endian-ness'  :big or :little (default is :big).  This option is meant for times when you want to encode a number in something other than big endian.
+A hash map placed in the vector should contain one entry of data (key doesn't matter) and one optional entry for 'endian-ness' :big or :little (default is :big).
 
 to see it in action:
 
