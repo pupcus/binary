@@ -26,10 +26,10 @@ There is a fairly general to-byte-array method that does this.  It takes a vecto
 
 examples:
 
-    (to-byte-array [10]
+    (to-byte-array [10])
     #<byte[] [B@6d386751>
 
-Doesn't show us moch. But to get a look at the byte [] in a more human readable form try this:
+Doesn't show us much. But to get a look at the byte [] in a more human readable form try this:
 
    (vec (to-byte-array [10]))
    [0 0 0 10]
@@ -38,19 +38,23 @@ examples of the sorts of things you can put into the vector for packing into the
 
    [10 [20 30 40] {:data 0x01020304 :endian :little} (byte 0x11) (short 23) (long 1000) 10.4 (float 10.4) "test" ["test" nil]]
 
-hash maps should contain one entry of data (key doesn't matter) and one optional entry for 'endian-ness'  :big or :little (default is :big).  This option is meant for times when you want to encode a some number in something other than big endian.  It doesn't handle BigInteger or BigDecimal (but it could I suppose -- I just don't need to pack or unpack those types of objects.
+hash maps should contain one entry of data (key doesn't matter) and one optional entry for 'endian-ness'  :big or :little (default is :big).  This option is meant for times when you want to encode a number in something other than big endian.
 
 to see it in action:
 
-   (vec (to-byte-array [10 [20 30 40] {:data 0x01020304 :endian :little} (byte 0x11) (short 23) (long 1000) 10.4 (float 10.4) "test" ["test" nil]]))
+   (vec (to-byte-array
+            [10 [20 30 40] {:data 0x01020304 :endian :little} (byte 0x11) (short 23) (long 1000) 10.4 (float 10.4) "test" ["test" nil]]))
+
+returns:
+
    [0 0 0 10 0 0 0 20 0 0 0 30 0 0 0 40 4 3 2 1 17 0 23 0 0 0 0 0 0 3 -24 64 36 -52 -52 -52 -52 -52 -51 65 38 102 102 116 101 115 116 116 101 115 116 0]
 
-so now I can build byte arrays with various 'pieces' of data and use that in testing the next set of functionality: encoding/decoding binary data
+so now I can build byte arrays with various 'pieces' of data fairly simply and use that in testing the next set of functionality: encoding/decoding binary data based on a description of how the data should be handled.
 
 
 Encoding/Decoding Binary Data:
 
-To describe a binary data structure to be ripped apart (decoded) into a hash map OR to squash (encode) a map into a binary data structure you describe the data structure with an array of maps as so:
+To describe how binary data should be ripped apart (decoded) into a hash map OR to squash (encode) a map into a binary data structure, you describe the data structure with an array of maps as so:
 
    (def structure  [{:name :command-length    :type :int}
                     {:name :command-id        :type :int :out #(kw-to-id (:command-id %)) :in #(id-to-kw (:command-id %))}
@@ -74,7 +78,7 @@ the in   function is given a map of the data pieces already read up to that poin
 the out  function is given a map of the data pieces to be written merged with data pieces that have already been written (in case they were changed or set by functions/kws)
 
      :number  (optional) (number of things of this type to read, default 1, (if (> number 1) <returns a vec of the items> <returns item>) )
-     :size    (optional) (only used for strings -- max length of strings)
+     :size    (optional) (only used for strings -- determines the max length of strings)
      
      for :number and :size you can specify the keyword name of an element to use for that value (must have already been read in)
                            OR you can specify a map {:in function/kw/value :out function/kw/value }
@@ -96,7 +100,7 @@ encode will return a byte [] of the encoded data
 
 explore the src to see what other functions are available (none are hidden .. use at your own risk :-) )
 
-constructive suggestions are welcome.
+constructive suggestions are welcome. If you use this and find any bugs please let me know.
 
   
 ## License
