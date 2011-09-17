@@ -40,7 +40,7 @@ Now, examples of the sorts of things you can put into the vector for packing int
 
 A hash map placed in the vector should contain one entry of data (key doesn't matter) and one optional entry for 'endian-ness' :big or :little (default is :big).
 
-The vector can contain: int, long, short, byte, BigIntegre, BigDecimal, ratios, char, string, nil, map (as mentioned above), and other nested vectors.
+The vector can contain: int, long, short, byte, BigInteger, BigDecimal, ratios, char, string, nil, map (as mentioned above), and other nested vectors.
 
 to see it in action:
 
@@ -115,12 +115,13 @@ where definition is the 'layout' definition of the binary data
 
 encode will return a byte [] of the encoded data
 
+see the tests for some trivial examples
+
 ## other stuff
 
-explore the src to see what other functions are available (none are hidden .. use at your own risk :-) )
+explore the src to see what other support functions are available (none are hidden .. use at your own risk :-) )
 
 constructive suggestions are welcome. If you use this and find any bugs please let me know.
-
   
 ## License
 
