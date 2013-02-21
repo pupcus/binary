@@ -23,27 +23,27 @@
     (is (= (vec ba) [116 101 115 116 0]))))
 
 (deftest test-vstring-byte-array
-  (let [ba (to-byte-array [[4 "test"]])]
+  (let [ba (to-byte-array [[(int32 4) "test"]])]
     (is (= byte-array-class (class ba)))
     (is (= (vec ba) [0 0 0 4 116 101 115 116]))))
 
 (deftest test-byte-byte-array
-  (let [ba (to-byte-array [(byte 1)])]
+  (let [ba (to-byte-array [(int8 1)])]
     (is (= byte-array-class (class ba)))
     (is (= (vec ba) [1]))))
 
 (deftest test-short-byte-array
-  (let [ba (to-byte-array [(short 1)])]
+  (let [ba (to-byte-array [(int16 1)])]
     (is (= byte-array-class (class ba)))
     (is (= (vec ba) [0 1]))))
 
 (deftest test-int-byte-array
-  (let [ba (to-byte-array [0x01020304])]
+  (let [ba (to-byte-array [(int32 0x01020304)])]
     (is (= byte-array-class (class ba)))
     (is (= (vec ba) [1 2 3 4]))))
 
 (deftest test-long-byte-array
-  (let [ba (to-byte-array [(long 0x01020304)])]
+  (let [ba (to-byte-array [(int64 0x01020304)])]
     (is (= byte-array-class (class ba)))
     (is (= (vec ba) [0 0 0 0 1 2 3 4]))))
 
@@ -65,17 +65,17 @@
 (deftest test-vector-byte-array
   (let [ba (to-byte-array [[10 20 30 40]])]
     (is (= byte-array-class (class ba)))
-    (is (= (vec ba) [0 0 0 10 0 0 0 20 0 0 0 30 0 0 0 40]))))
+    (is (= (vec ba) [0 0 0 0 0 0 0 10 0 0 0 0 0 0 0 20 0 0 0 0 0 0 0 30 0 0 0 0 0 0 0 40]))))
 
 (deftest test-mixed-byte-array
-  (let [ba (to-byte-array [nil 10 (long 0x01020304) (short 20) (byte 10) "test" \a])]
+  (let [ba (to-byte-array [nil 10 (int32 0x01020304) (short 20) (byte 10) "test" \a])]
     (is (= byte-array-class (class ba)))
-    (is (= (vec ba) [0 0 0 0 10 0 0 0 0 1 2 3 4 0 20 10 116 101 115 116 97]))))
+    (is (= (vec ba) [0 0 0 0 0 0 0 0 10 1 2 3 4 0 20 10 116 101 115 116 97]))))
 
 (deftest test-map-byte-array
-  (let [ba (to-byte-array [{:somekey 10} {:somekey (long 10)} {:somekey 10 :endian :little} {:somekey (long 10) :endian :little}])]
+  (let [ba (to-byte-array [{:somekey 10} {:somekey (int32 10)} {:somekey (int32 10) :endian :little} {:somekey 10 :endian :little}])]
     (is (= byte-array-class (class ba)))
-    (is (= (vec ba) [0 0 0 10 0 0 0 0 0 0 0 10 10 0 0 0 10 0 0 0 0 0 0 0]))))
+    (is (= (vec ba) [0 0 0 0 0 0 0 10 0 0 0 10 10 0 0 0 10 0 0 0 0 0 0 0]))))
 
 (deftest test-map-with-string-byte-array
   (let [ba (to-byte-array [{:somekey "test" :endian :little} {:somekey "test"}])]
@@ -83,18 +83,17 @@
     (is (= (vec ba) [116 101 115 116 116 101 115 116]))))
 
 (deftest test-mixes-byte-array
-  (let [ba (to-byte-array ["test" nil [10 20 30 40] [\a [\b "test" (long 10)]] {:data 0xFF :endian :big} (byte 3)])]
+  (let [ba (to-byte-array ["test" nil (vec (map int32 [10 20 30 40])) [\a [\b "test" (long 10)]] {:data 0xFF :endian :big} (byte 3)])]
     (is (= byte-array-class (class ba)))
-    (is (= (vec ba) [116 101 115 116 0 0 0 0 10 0 0 0 20 0 0 0 30 0 0 0 40 97 98 116 101 115 116 0 0 0 0 0 0 0 10 0 0 0 -1 3]))))
+    (is (= (vec ba) [116 101 115 116 0 0 0 0 10 0 0 0 20 0 0 0 30 0 0 0 40 97 98 116 101 115 116 0 0 0 0 0 0 0 10 0 0 0 0 0 0 0 -1 3]))))
 
 ;;
 ;; testing bit-set?
 ;;
 
 (deftest bit-set?-test
-  (let [n 0x800000000000000000000000000000008000000000000001]
-    (is (true? (bit-set? 191 n)))
-    (is (true? (bit-set? 63 n)))
+  (let [n 0x7000000000000001]
+    (is (true? (bit-set? 62 n)))
     (is (false? (bit-set? 1 n)))
     (is (true? (bit-set? 0 n)))))
 

@@ -41,11 +41,38 @@
 ;;
 ;; utilities for building java byte arrays (byte[])
 
-(defn as-byte [i]
-  (byte (let [i (bit-and 0xFF i)]
-          (if (> i 127)
-            (- i 256)
-            i))))
+(defn as-byte [n]
+  (byte
+   (let [n (bit-and 0xFF n)]
+     (if (> n 0x7F)
+       (- n (inc 0xFF))
+       n))))
+
+(defn as-short [n]
+  (short
+   (let [n (bit-and 0xFFFF n)]
+     (if (> n 0x7FFF)
+       (- n (inc 0xFFFF))
+       n))))
+
+(defn as-int [n]
+  (Integer/valueOf
+   (let [n (bit-and 0xFFFFFFFF n)]
+     (if (> n 0x7FFFFFFF)
+       (- n (inc 0xFFFFFFFF))
+       n))))
+
+(defn int8 [n]
+  (as-byte n))
+
+(defn int16 [n]
+  (as-short n))
+
+(defn int32 [n]
+  (as-int n))
+
+(defn int64 [l]
+  (Long/valueOf l))
 
 (defmulti to-bytes class)
 
@@ -73,10 +100,10 @@
 
 (defmethod to-bytes java.math.BigInteger [bi]
   (let [bytes (to-bytes (.toByteArray bi))]
-    (flatten [(to-bytes (count bytes)) bytes])))
+    (flatten [(to-bytes (int32 (count bytes))) bytes])))
 
 (defmethod to-bytes java.math.BigDecimal [bd]
-  (flatten [(to-bytes (.unscaledValue bd)) (to-bytes (.scale bd))]))
+  (flatten [(to-bytes (.unscaledValue bd)) (to-bytes (int32 (.scale bd)))]))
 
 (defmethod to-bytes clojure.lang.Ratio [r]
   (flatten [(to-bytes (numerator r)) (to-bytes (denominator r))]))

@@ -114,7 +114,7 @@
 (defmulti write write-dispatch)
 
 (defmethod write :int [buf {:keys [endian] :or {endian :big}} data]
-  (let [bytes (to-byte-array [{:data data :endian endian}])]
+  (let [bytes (to-byte-array [{:data (int32 data) :endian endian}])]
     (.write buf bytes 0 (count bytes))))
 
 (defmethod write :long [buf {:keys [endian] :or {endian :big}} data]
@@ -132,12 +132,12 @@
 (defmethod write :cstring [buf {:keys [size]} data]
   (let [data-bytes (.getBytes data)]
     (.write buf data-bytes 0 (min (count data-bytes) (dec size)))
-    (.write buf 0)))
+    (.write buf (int 0))))
 
 (defmethod write :vstring [buf {:keys [size endian] :or {endian :big}} data]
   (let [bytes (.getBytes data)
         size (min (count bytes) size) 
-        size-bytes (to-byte-array [{:data size :endian endian}])]
+        size-bytes (to-byte-array [{:data (int32 size) :endian endian}])]
     (.write buf size-bytes 0 (count size-bytes))
     (.write buf bytes 0 size)))
 

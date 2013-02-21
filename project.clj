@@ -4,7 +4,7 @@
 
   :repositories         { "sonatype-oss-public" "https://oss.sonatype.org/content/groups/public" }
 
-  :dependencies         [[org.clojure/clojure "1.2.1"]
+  :dependencies         [[org.clojure/clojure "1.3.0"]
                          [log4j "1.2.15"
                                 :exclusions [javax.mail/mail javax.jms/jms com.sun.jdmk/jmxtools com.sun.jmx/jmxri]]
                          [org.slf4j/slf4j-log4j12 "1.6.1"]]

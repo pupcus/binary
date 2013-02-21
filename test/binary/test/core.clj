@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [read])
   (:use [clojure.test])
   (:use [binary.core])
-  (:require [binary.utils :as utils]))
+  (:use [binary.utils]))
 
 ;;
 ;; testing the (value) multimethod
@@ -86,62 +86,62 @@
 
 
 (deftest read-integer-form
-  (let [val 10
-        bb (java.nio.ByteBuffer/wrap (utils/to-byte-array [val]))
+  (let [val (int32 10)
+        bb (java.nio.ByteBuffer/wrap (to-byte-array [val]))
         form {:name :data :type :int}]
     (is (= val (binary.core/read bb form)))))
 
 (deftest read-integer-little-endian-form
-  (let [val 10
-        bb (java.nio.ByteBuffer/wrap (utils/to-byte-array [{:data val :endian :little}]))
+  (let [val (int32 10)
+        bb (java.nio.ByteBuffer/wrap (to-byte-array [{:data val :endian :little}]))
         form {:name :data :type :int :endian :little}]
     (is (= val (binary.core/read bb form)))))
 
 (deftest read-long-form
   (let [val (long 0x00FFFFFFFFFFFFFF)
-        bb (java.nio.ByteBuffer/wrap (utils/to-byte-array [val]))
+        bb (java.nio.ByteBuffer/wrap (to-byte-array [val]))
         form {:name :data :type :long}]
     (is (= val (binary.core/read bb form)))))
 
 (deftest read-long-little-endian-form
   (let [val (long 0x00FFFFFFFFFFFFFF)
-        bb (java.nio.ByteBuffer/wrap (utils/to-byte-array [{:data val :endian :little}]))
+        bb (java.nio.ByteBuffer/wrap (to-byte-array [{:data val :endian :little}]))
         form {:name :data :type :long :endian :little}]
     (is (= val (binary.core/read bb form)))))
 
 (deftest read-float-form
   (let [val (float 1.1)
-        bb (java.nio.ByteBuffer/wrap (utils/to-byte-array [val]))
+        bb (java.nio.ByteBuffer/wrap (to-byte-array [val]))
         form {:name :data :type :float}]
     (is (= val (binary.core/read bb form)))))
 
 (deftest read-float-little-endian-form
   (let [val (float 1.1)
-        bb (java.nio.ByteBuffer/wrap (utils/to-byte-array [{:data val :endian :little}]))
+        bb (java.nio.ByteBuffer/wrap (to-byte-array [{:data val :endian :little}]))
         form {:name :data :type :float :endian :little}]
     (is (= val (binary.core/read bb form)))))
 
 (deftest read-double-form
   (let [val 1.1
-        bb (java.nio.ByteBuffer/wrap (utils/to-byte-array [val]))
+        bb (java.nio.ByteBuffer/wrap (to-byte-array [val]))
         form {:name :data :type :double}]
     (is (= val (binary.core/read bb form)))))
 
 (deftest read-double-little-endian-form
   (let [val 1.1
-        bb (java.nio.ByteBuffer/wrap (utils/to-byte-array [{:data val :endian :little}]))
+        bb (java.nio.ByteBuffer/wrap (to-byte-array [{:data val :endian :little}]))
         form {:name :data :type :double :endian :little}]
     (is (= val (binary.core/read bb form)))))
 
 (deftest read-cstring-form
   (let [val "cstring"
-        bb (java.nio.ByteBuffer/wrap (utils/to-byte-array [[val nil]]))
+        bb (java.nio.ByteBuffer/wrap (to-byte-array [[val nil]]))
         form {:name :data :type :cstring :size 100}]
     (is (= val (binary.core/read bb form)))))
 
 (deftest read-vstring-form
   (let [val "vstring"
-        bb (java.nio.ByteBuffer/wrap (utils/to-byte-array [[7 val]]))
+        bb (java.nio.ByteBuffer/wrap (to-byte-array [[(int32 7) val]]))
         form {:name :data :type :vstring :size 100}]
     (is (= val (binary.core/read bb form)))))
 
@@ -150,32 +150,32 @@
 ;;
 
 (deftest write-integer-form
-  (let [val 10
-        check (utils/to-bytes [val])
+  (let [val (int32 10)
+        check (to-bytes [val])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :int}
         _    (binary.core/write buf form val)]
     (is (= check (vec (.toByteArray buf))))))
 
 (deftest write-integer-little-endian-form
-  (let [val 10
-        check (utils/to-bytes [{:data val :endian :little}])
+  (let [val (int32 10)
+        check (to-bytes [{:data val :endian :little}])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :int :endian :little}
            _    (binary.core/write buf form val)]
     (is (= check (vec (.toByteArray buf))))))
 
 (deftest write-long-form
-  (let [val (long 20)
-        check (utils/to-bytes [val])
+  (let [val 20
+        check (to-bytes [val])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :long}
         _    (binary.core/write buf form val)]
     (is (= check (vec (.toByteArray buf))))))
 
 (deftest write-long-little-endian-form
-  (let [val (long 20)
-        check (utils/to-bytes [{:data val :endian :little}])
+  (let [val 20
+        check (to-bytes [{:data val :endian :little}])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :long :endian :little}
            _    (binary.core/write buf form val)]
@@ -183,7 +183,7 @@
 
 (deftest write-float-form
   (let [val (float 1.1)
-        check (utils/to-bytes [val])
+        check (to-bytes [val])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :float}
         _    (binary.core/write buf form val)]
@@ -191,7 +191,7 @@
 
 (deftest write-float-little-endian-form
   (let [val (float 1.1)
-        check (utils/to-bytes [{:data val :endian :little}])
+        check (to-bytes [{:data val :endian :little}])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :float :endian :little}
            _    (binary.core/write buf form val)]
@@ -199,7 +199,7 @@
 
 (deftest write-double-form
   (let [val 1.1
-        check (utils/to-bytes [val])
+        check (to-bytes [val])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :double}
         _    (binary.core/write buf form val)]
@@ -207,7 +207,7 @@
 
 (deftest write-double-little-endian-form
   (let [val 1.1
-        check (utils/to-bytes [{:data val :endian :little}])
+        check (to-bytes [{:data val :endian :little}])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :double :endian :little}
            _    (binary.core/write buf form val)]
@@ -215,7 +215,7 @@
 
 (deftest write-cstring-form
   (let [val "cstring"
-        check (utils/to-bytes [[val nil]])
+        check (to-bytes [[val nil]])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :cstring :size 100}
         _    (binary.core/write buf form val)]
@@ -223,7 +223,7 @@
 
 (deftest write-vstring-form
   (let [val "vstring"
-        check (utils/to-bytes [[7 val]])
+        check (to-bytes [[(int32 7) val]])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :vstring :size 100}
         _    (binary.core/write buf form val)]
@@ -245,7 +245,7 @@
    :out  0x0000000b})
 
 (def expected
-  (utils/to-byte-array [16 11 2 {:data 1 :endian :little} 0.9312 10.88745 (float 1.1) [10 20] [4 "text"] ["test string" nil]]))
+  (to-byte-array [(int32 16) (int32 11) (int32 2) {:data (int32 1) :endian :little} 0.9312 10.88745 (float 1.1) [(int32 10) (int32 20)] [(int32 4) "text"] ["test string" nil]]))
 
 (def definition [{:name :command-length    :type :int}
                  {:name :command-id        :type :int :out #(kw-to-id (:command-id %)) :in #(id-to-kw (:command-id %))}
@@ -272,11 +272,11 @@
     (is (= "test string"  (:body results)))))
 
 (deftest encoding-test
-  (let [data  { :command-length 16
+  (let [data  { :command-length (int32 16)
                :command-id :out
-               :command-status 2
-               :sequence-number 1
-               :points  [10 20]
+               :command-status (int32 2)
+               :sequence-number (int32 1)
+               :points  [(int32 10) (int32 20)]
                :fraction 0.9312
                :percentage 10.88745
                :average (float 1.1)
@@ -287,11 +287,11 @@
     (is (= (vec expected) (vec results)))))
 
 (deftest roundtrip-test
-  (let [data  { :command-length 16
+  (let [data  { :command-length (int32 16)
                :command-id :out
-               :command-status 2
-               :sequence-number 1
-               :points  [10 20]
+               :command-status (int32 2)
+               :sequence-number (int32 1)
+               :points  [(int32 10) (int32 20)]
                :fraction 0.9312
                :percentage 10.88745
                :average (float 1.1)
