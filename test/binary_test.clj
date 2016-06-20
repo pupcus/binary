@@ -1,8 +1,8 @@
-(ns binary.test.core
+(ns binary-test
   (:refer-clojure :exclude [read])
-  (:use [clojure.test])
-  (:use [binary.core])
-  (:use [binary.utils]))
+  (:require [binary  :refer :all]
+            [binary.utils :refer :all]
+            [clojure.test :refer :all]))
 
 ;;
 ;; testing the (value) multimethod
@@ -89,61 +89,61 @@
   (let [val (int32 10)
         bb (java.nio.ByteBuffer/wrap (to-byte-array [val]))
         form {:name :data :type :int}]
-    (is (= val (binary.core/read bb form)))))
+    (is (= val (binary/read bb form)))))
 
 (deftest read-integer-little-endian-form
   (let [val (int32 10)
         bb (java.nio.ByteBuffer/wrap (to-byte-array [{:data val :endian :little}]))
         form {:name :data :type :int :endian :little}]
-    (is (= val (binary.core/read bb form)))))
+    (is (= val (binary/read bb form)))))
 
 (deftest read-long-form
   (let [val (long 0x00FFFFFFFFFFFFFF)
         bb (java.nio.ByteBuffer/wrap (to-byte-array [val]))
         form {:name :data :type :long}]
-    (is (= val (binary.core/read bb form)))))
+    (is (= val (binary/read bb form)))))
 
 (deftest read-long-little-endian-form
   (let [val (long 0x00FFFFFFFFFFFFFF)
         bb (java.nio.ByteBuffer/wrap (to-byte-array [{:data val :endian :little}]))
         form {:name :data :type :long :endian :little}]
-    (is (= val (binary.core/read bb form)))))
+    (is (= val (binary/read bb form)))))
 
 (deftest read-float-form
   (let [val (float 1.1)
         bb (java.nio.ByteBuffer/wrap (to-byte-array [val]))
         form {:name :data :type :float}]
-    (is (= val (binary.core/read bb form)))))
+    (is (= val (binary/read bb form)))))
 
 (deftest read-float-little-endian-form
   (let [val (float 1.1)
         bb (java.nio.ByteBuffer/wrap (to-byte-array [{:data val :endian :little}]))
         form {:name :data :type :float :endian :little}]
-    (is (= val (binary.core/read bb form)))))
+    (is (= val (binary/read bb form)))))
 
 (deftest read-double-form
   (let [val 1.1
         bb (java.nio.ByteBuffer/wrap (to-byte-array [val]))
         form {:name :data :type :double}]
-    (is (= val (binary.core/read bb form)))))
+    (is (= val (binary/read bb form)))))
 
 (deftest read-double-little-endian-form
   (let [val 1.1
         bb (java.nio.ByteBuffer/wrap (to-byte-array [{:data val :endian :little}]))
         form {:name :data :type :double :endian :little}]
-    (is (= val (binary.core/read bb form)))))
+    (is (= val (binary/read bb form)))))
 
 (deftest read-cstring-form
   (let [val "cstring"
         bb (java.nio.ByteBuffer/wrap (to-byte-array [[val nil]]))
         form {:name :data :type :cstring :size 100}]
-    (is (= val (binary.core/read bb form)))))
+    (is (= val (binary/read bb form)))))
 
 (deftest read-vstring-form
   (let [val "vstring"
         bb (java.nio.ByteBuffer/wrap (to-byte-array [[(int32 7) val]]))
         form {:name :data :type :vstring :size 100}]
-    (is (= val (binary.core/read bb form)))))
+    (is (= val (binary/read bb form)))))
 
 ;;
 ;; test the wrtie multimethod
@@ -154,7 +154,7 @@
         check (to-bytes [val])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :int}
-        _    (binary.core/write buf form val)]
+        _    (binary/write buf form val)]
     (is (= check (vec (.toByteArray buf))))))
 
 (deftest write-integer-little-endian-form
@@ -162,7 +162,7 @@
         check (to-bytes [{:data val :endian :little}])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :int :endian :little}
-           _    (binary.core/write buf form val)]
+           _    (binary/write buf form val)]
     (is (= check (vec (.toByteArray buf))))))
 
 (deftest write-long-form
@@ -170,7 +170,7 @@
         check (to-bytes [val])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :long}
-        _    (binary.core/write buf form val)]
+        _    (binary/write buf form val)]
     (is (= check (vec (.toByteArray buf))))))
 
 (deftest write-long-little-endian-form
@@ -178,7 +178,7 @@
         check (to-bytes [{:data val :endian :little}])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :long :endian :little}
-           _    (binary.core/write buf form val)]
+           _    (binary/write buf form val)]
     (is (= check (vec (.toByteArray buf))))))
 
 (deftest write-float-form
@@ -186,7 +186,7 @@
         check (to-bytes [val])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :float}
-        _    (binary.core/write buf form val)]
+        _    (binary/write buf form val)]
     (is (= check (vec (.toByteArray buf))))))
 
 (deftest write-float-little-endian-form
@@ -194,7 +194,7 @@
         check (to-bytes [{:data val :endian :little}])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :float :endian :little}
-           _    (binary.core/write buf form val)]
+           _    (binary/write buf form val)]
     (is (= check (vec (.toByteArray buf))))))
 
 (deftest write-double-form
@@ -202,7 +202,7 @@
         check (to-bytes [val])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :double}
-        _    (binary.core/write buf form val)]
+        _    (binary/write buf form val)]
     (is (= check (vec (.toByteArray buf))))))
 
 (deftest write-double-little-endian-form
@@ -210,7 +210,7 @@
         check (to-bytes [{:data val :endian :little}])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :double :endian :little}
-           _    (binary.core/write buf form val)]
+           _    (binary/write buf form val)]
     (is (= check (vec (.toByteArray buf))))))
 
 (deftest write-cstring-form
@@ -218,7 +218,7 @@
         check (to-bytes [[val nil]])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :cstring :size 100}
-        _    (binary.core/write buf form val)]
+        _    (binary/write buf form val)]
     (is (= check (vec (.toByteArray buf))))))
 
 (deftest write-vstring-form
@@ -226,7 +226,7 @@
         check (to-bytes [[(int32 7) val]])
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :vstring :size 100}
-        _    (binary.core/write buf form val)]
+        _    (binary/write buf form val)]
     (is (= check (vec (.toByteArray buf))))))
 
 ;;

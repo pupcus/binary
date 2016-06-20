@@ -1,7 +1,6 @@
-
-(ns binary.test.utils
-  (:use [binary.utils])
-  (:use [clojure.test]))
+(ns binary.utils-test
+  (:require [binary.utils :refer :all]
+            [clojure.test :refer :all]))
 
 ;;
 ;; testing making various byte arrays

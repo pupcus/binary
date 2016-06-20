@@ -1,4 +1,4 @@
-(ns binary.core
+(ns binary
   (:refer-clojure :exclude [read])
   (:require [binary.utils :refer :all])
   (:import java.nio.ByteOrder))
