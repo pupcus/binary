@@ -71,7 +71,7 @@
 (defn int32 [n]
   (as-int n))
 
-(defn int64 [l]
+(defn int64 [^Long l]
   (Long/valueOf l))
 
 (defmulti to-bytes class)
@@ -98,21 +98,21 @@
 (defmethod to-bytes java.lang.Double [d]
   (vec (.array (.flip (.putDouble (java.nio.ByteBuffer/allocate double-size) d)))))
 
-(defmethod to-bytes java.math.BigInteger [bi]
+(defmethod to-bytes java.math.BigInteger [^java.math.BigInteger bi]
   (let [bytes (to-bytes (.toByteArray bi))]
     (flatten [(to-bytes (int32 (count bytes))) bytes])))
 
-(defmethod to-bytes java.math.BigDecimal [bd]
+(defmethod to-bytes java.math.BigDecimal [^java.math.BigDecimal bd]
   (flatten [(to-bytes (.unscaledValue bd)) (to-bytes (int32 (.scale bd)))]))
 
 (defmethod to-bytes clojure.lang.Ratio [r]
   (flatten [(to-bytes (numerator r)) (to-bytes (denominator r))]))
 
 (defmethod to-bytes java.lang.String [s]
-  (vec (map to-bytes s)))
+  (vec (mapv to-bytes s)))
 
 (defmethod to-bytes clojure.lang.IPersistentVector [v]
-  (vec (flatten (map #(to-bytes %) v))))
+  (vec (flatten (mapv to-bytes v))))
 
 (defn process-persistent-map [data endian]
   (if (> (count data) 1)
