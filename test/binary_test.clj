@@ -85,6 +85,31 @@
 ;;
 
 
+(deftest read-byte-form
+  (let [val (int8 10)
+        bb (java.nio.ByteBuffer/wrap (to-byte-array [val]))
+        form {:name :data :type :byte}]
+    (is (= val (binary/read bb form)))))
+
+;; pointless?? but can be specified anyway
+(deftest read-byte-little-endian-form
+  (let [val (int16 10)
+        bb (java.nio.ByteBuffer/wrap (to-byte-array [{:data val :endian :little}]))
+        form {:name :data :type :byte :endian :little}]
+    (is (= val (binary/read bb form)))))
+
+(deftest read-short-form
+  (let [val (int16 10)
+        bb (java.nio.ByteBuffer/wrap (to-byte-array [val]))
+        form {:name :data :type :short}]
+    (is (= val (binary/read bb form)))))
+
+(deftest read-short-little-endian-form
+  (let [val (int16 10)
+        bb (java.nio.ByteBuffer/wrap (to-byte-array [{:data val :endian :little}]))
+        form {:name :data :type :short :endian :little}]
+    (is (= val (binary/read bb form)))))
+
 (deftest read-integer-form
   (let [val (int32 10)
         bb (java.nio.ByteBuffer/wrap (to-byte-array [val]))
@@ -133,6 +158,12 @@
         form {:name :data :type :double :endian :little}]
     (is (= val (binary/read bb form)))))
 
+(deftest read-char-form
+  (let [val (char 65)
+        bb (java.nio.ByteBuffer/wrap (to-byte-array [val]))
+        form {:name :data :type :char}]
+    (is (= val (binary/read bb form)))))
+
 (deftest read-cstring-form
   (let [val "cstring"
         bb (java.nio.ByteBuffer/wrap (to-byte-array [[val nil]]))
@@ -148,6 +179,22 @@
 ;;
 ;; test the wrtie multimethod
 ;;
+
+(deftest write-byte-form
+  (let [val (int8 10)
+        check (to-bytes [val])
+        buf (java.io.ByteArrayOutputStream.)
+        form {:name :data :type :byte}
+        _    (binary/write buf form val)]
+    (is (= check (vec (.toByteArray buf))))))
+
+(deftest write-short-form
+  (let [val (int16 10)
+        check (to-bytes [val])
+        buf (java.io.ByteArrayOutputStream.)
+        form {:name :data :type :short}
+        _    (binary/write buf form val)]
+    (is (= check (vec (.toByteArray buf))))))
 
 (deftest write-integer-form
   (let [val (int32 10)
@@ -211,6 +258,14 @@
         buf (java.io.ByteArrayOutputStream.)
         form {:name :data :type :double :endian :little}
            _    (binary/write buf form val)]
+    (is (= check (vec (.toByteArray buf))))))
+
+(deftest write-char-form
+  (let [val \A
+        check (to-bytes [val])
+        buf (java.io.ByteArrayOutputStream.)
+        form {:name :data :type :char}
+        _    (binary/write buf form val)]
     (is (= check (vec (.toByteArray buf))))))
 
 (deftest write-cstring-form

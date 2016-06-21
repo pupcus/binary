@@ -43,6 +43,14 @@
 
 (defmulti read read-dispatch)
 
+(defmethod read :byte [^java.nio.ByteBuffer buf {:keys [endian] :or {endian :big}}]
+  (.order buf (endian byte-order))
+  (.get buf))
+
+(defmethod read :short [^java.nio.ByteBuffer buf {:keys [endian] :or {endian :big}}]
+  (.order buf (endian byte-order))
+  (.getShort buf))
+
 (defmethod read :int [^java.nio.ByteBuffer buf {:keys [endian] :or {endian :big}}]
   (.order buf (endian byte-order))
   (.getInt buf))
@@ -58,6 +66,10 @@
 (defmethod read :double [^java.nio.ByteBuffer buf {:keys [endian] :or {endian :big}}]
   (.order buf (endian byte-order))
   (.getDouble buf))
+
+(defmethod read :char [^java.nio.ByteBuffer buf {:keys [endian] :or {endian :big}}]
+  (.order buf (endian byte-order))
+  (char (.get buf)))
 
 (defn bytes-to-string [ba]
   (apply str (map char ba)))
@@ -116,6 +128,14 @@
 
 (defmulti write write-dispatch)
 
+(defmethod write :byte [^java.io.ByteArrayOutputStream buf {:keys [endian] :or {endian :big}} data]
+  (let [bytes (to-byte-array [{:data (int8 data) :endian endian}])]
+    (.write buf bytes 0 (count bytes))))
+
+(defmethod write :short [^java.io.ByteArrayOutputStream buf {:keys [endian] :or {endian :big}} data]
+  (let [bytes (to-byte-array [{:data (int16 data) :endian endian}])]
+    (.write buf bytes 0 (count bytes))))
+
 (defmethod write :int [^java.io.ByteArrayOutputStream buf {:keys [endian] :or {endian :big}} data]
   (let [bytes (to-byte-array [{:data (int32 data) :endian endian}])]
     (.write buf bytes 0 (count bytes))))
@@ -130,6 +150,10 @@
 
 (defmethod write :double [^java.io.ByteArrayOutputStream buf {:keys [endian] :or {endian :big}} data]
   (let [bytes (to-byte-array [{:data data :endian endian}])]
+    (.write buf bytes 0 (count bytes))))
+
+(defmethod write :char [^java.io.ByteArrayOutputStream buf {:keys [endian] :or {endian :big}} data]
+  (let [bytes (to-byte-array [{:data (char data) :endian endian}])]
     (.write buf bytes 0 (count bytes))))
 
 (defmethod write :cstring [^java.io.ByteArrayOutputStream buf {:keys [size]} ^String data]
