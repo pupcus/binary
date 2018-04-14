@@ -1,10 +1,10 @@
 (defproject binary "0.0.2-SNAPSHOT"
   
-  :description          "clojure tools for reading writing binary data"
+  :description  "clojure tools for reading writing binary data"
 
-  :url "https://bitbucket.org/pupcus/binary"
+  :url "https://github.com/pupcus/binary"
 
-  :scm {:url "git@bitbucket.org:pupcus/binary"}
+  :scm {:url "git@github.com:pupcus/binary.git"}
 
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
